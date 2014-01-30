@@ -1235,7 +1235,8 @@ public class LoadBalancingRulesManagerImpl<Type> extends ManagerBase implements 
 
         if (generateUsageEvent) {
             // Generate usage event right after all rules were marked for revoke
-            UsageEventUtils.publishUsageEvent(EventTypes.EVENT_LOAD_BALANCER_DELETE, lb.getAccountId(), 0, lb.getId(),
+            Network network = _networkModel.getNetwork(lb.getNetworkId());
+            UsageEventUtils.publishUsageEvent(EventTypes.EVENT_LOAD_BALANCER_DELETE, lb.getAccountId(), network.getDataCenterId(), lb.getId(),
                     null, LoadBalancingRule.class.getName(), lb.getUuid());
         }
 
