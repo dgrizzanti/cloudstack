@@ -24,6 +24,8 @@ import com.cloud.user.AccountVO;
 import com.cloud.user.User;
 import com.cloud.user.dao.AccountDao;
 import com.cloud.user.dao.UserDao;
+import com.cloud.projects.dao.ProjectDao;
+import com.cloud.projects.Project;
 import com.cloud.user.UserContext;
 import com.cloud.utils.component.ComponentContext;
 import org.apache.cloudstack.framework.events.EventBus;
@@ -43,21 +45,24 @@ public class ActionEventUtils {
 
     private static EventDao _eventDao;
     private static AccountDao _accountDao;
+    private static ProjectDao _projectDao;
     protected static UserDao _userDao;
     protected static EventBus _eventBus = null;
 
     @Inject EventDao eventDao;
     @Inject AccountDao accountDao;
     @Inject UserDao userDao;
+    @Inject ProjectDao projectDao;
 
     public ActionEventUtils() {
     }
-    
+
     @PostConstruct
     void init() {
     	_eventDao = eventDao;
     	_accountDao = accountDao;
     	_userDao = userDao;
+      _projectDao = projectDao;
     }
 
     public static Long onActionEvent(Long userId, Long accountId, Long domainId, String type, String description) {
@@ -169,6 +174,7 @@ public class ActionEventUtils {
                 EventTypes.getEntityForEvent(eventType), null);
 
         Map<String, String> eventDescription = new HashMap<String, String>();
+        Project project = _projectDao.findByProjectAccountId(accountId);
         Account account = _accountDao.findById(accountId);
         User user = _userDao.findById(userId);
         // if account has been deleted, this might be called during cleanup of resources and results in null pointer
@@ -176,6 +182,8 @@ public class ActionEventUtils {
             return;
         if (user == null)
             return;
+        if (project != null)
+            eventDescription.put("project", project.getUuid());
         eventDescription.put("user", user.getUuid());
         eventDescription.put("account", account.getUuid());
         eventDescription.put("event", eventType);
