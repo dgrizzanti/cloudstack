@@ -24,6 +24,7 @@ import org.apache.cloudstack.api.Parameter;
 import org.apache.cloudstack.api.ServerApiException;
 import org.apache.cloudstack.api.response.ProjectResponse;
 import org.apache.cloudstack.api.response.SuccessResponse;
+import com.cloud.projects.Project;
 import org.apache.log4j.Logger;
 
 import com.cloud.event.EventTypes;
@@ -91,9 +92,10 @@ public class UpdateProjectInvitationCmd extends BaseAsyncCmd {
     @Override
     public void execute() {
         UserContext.current().setEventDetails("Project id: " + projectId + "; accountName " + accountName + "; accept " + getAccept());
-        boolean result = _projectService.updateInvitation(projectId, accountName, token, getAccept());
-        if (result) {
-            SuccessResponse response = new SuccessResponse(getCommandName());
+        Project project = _projectService.updateInvitation(projectId, accountName, token, getAccept());
+        if (project != null) {
+            ProjectResponse response = _responseGenerator.createProjectResponse(project);
+            response.setResponseName(getCommandName());
             this.setResponseObject(response);
         } else {
             throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to join the project");
